@@ -7,18 +7,10 @@ function DirectoryBrowser({ selectedDir, onSelectDir }) {
     const [directories, setDirectories] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // NEW: Refs to save/restore scroll
     const scrollContainerRef = useRef(null);
-    const savedScrollTopRef = useRef(0);
+    const scrollStack = useRef([]);
 
-    const load = useCallback((path) => {
-        // NEW: Save scroll position BEFORE loading new data
-        if (scrollContainerRef.current) {
-            const scrollHeight = scrollContainerRef.current.scrollHeight;
-            const scrollTop = scrollContainerRef.current.scrollTop;
-            savedScrollTopRef.current = scrollHeight - scrollTop; // distance from bottom
-        }
-
+    const load = useCallback((path, restoreScroll = false) => {
         setLoading(true);
         browseDir(path)
             .then((data) => {
@@ -26,25 +18,19 @@ function DirectoryBrowser({ selectedDir, onSelectDir }) {
                 setCurrentPath(data.relPath);
                 setLoading(false);
                 onSelectDir(data.relPath === "." ? "" : data.relPath);
+                requestAnimationFrame(() => {
+                    if (scrollContainerRef.current) {
+                        scrollContainerRef.current.scrollTop = restoreScroll
+                            ? (scrollStack.current.pop() ?? 0)
+                            : 0;
+                    }
+                });
             })
             .catch((err) => {
                 console.error(err);
                 setLoading(false);
             });
     }, [onSelectDir]);
-
-    // NEW: Restore scroll position AFTER directories update
-    useEffect(() => {
-        if (scrollContainerRef.current && !loading) {
-            // Small delay to ensure DOM updated
-            requestAnimationFrame(() => {
-                if (scrollContainerRef.current) {
-                    const newScrollHeight = scrollContainerRef.current.scrollHeight;
-                    scrollContainerRef.current.scrollTop = newScrollHeight - savedScrollTopRef.current;
-                }
-            });
-        }
-    }, [directories, loading]);
 
     useEffect(() => {
         load(".");
@@ -55,10 +41,11 @@ function DirectoryBrowser({ selectedDir, onSelectDir }) {
         const parts = currentPath.split(/[\\/]/).filter(Boolean);
         parts.pop();
         const newPath = parts.length ? parts.join("/") : ".";
-        load(newPath);
+        load(newPath, true);
     };
 
     const openDir = (dir) => {
+        scrollStack.current.push(scrollContainerRef.current?.scrollTop ?? 0);
         load(dir.path);
     };
 
