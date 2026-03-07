@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-
-const mediaDir = path.join(__dirname, "../assets");
+const { getSettings } = require("../settings");
 
 const ffmpeg = require("fluent-ffmpeg");
 const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
@@ -34,6 +33,7 @@ async function ensureThumbnail(videoPath, thumbDir, thumbFilename) {
 }
 
 async function getMediaFromDir(dir = ".") {
+    const mediaDir = getSettings().baseFolder;
     const fullDir = path.join(mediaDir, dir);
     if (!fs.existsSync(fullDir)) return [];
 

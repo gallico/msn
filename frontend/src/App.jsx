@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import Gallery from "./components/Gallery";
 import DirectoryBrowser from "./components/DirectoryBrowser";
+import SettingsModal from "./components/SettingsModal";
+import ZipUpload from "./components/ZipUpload";
 import "./index.css";
 import "./App.css";
 
@@ -9,6 +11,8 @@ function App() {
     const [dir, setDir] = useState("");
     const [sidebarWidth, setSidebarWidth] = useState(260); // initial width in px
     const [isResizing, setIsResizing] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -41,14 +45,29 @@ function App() {
         setIsResizing(true);
     };
 
+    const handleSettingsSave = () => {
+        setSettingsOpen(false);
+        setDir("");
+        setRefreshKey((k) => k + 1);
+    };
+
     return (
         <div className="App layout">
             <aside
                 className="sidebar"
                 style={{ width: `${sidebarWidth}px` }}
             >
-                <h2>Folders</h2>
-                <DirectoryBrowser selectedDir={dir} onSelectDir={setDir} />
+                <div className="sidebar-heading">
+                    <h2>Folders</h2>
+                    <button
+                        className="settings-btn"
+                        onClick={() => setSettingsOpen(true)}
+                        title="Settings"
+                    >
+                        ⚙
+                    </button>
+                </div>
+                <DirectoryBrowser key={refreshKey} selectedDir={dir} onSelectDir={setDir} />
             </aside>
 
             {/* draggable divider */}
@@ -58,12 +77,22 @@ function App() {
             />
 
             <main className="main-content">
-                <h1>Gallery</h1>
+                <div className="main-header">
+                    <h1>Gallery</h1>
+                    <ZipUpload currentDir={dir} onDone={() => setRefreshKey((k) => k + 1)} />
+                </div>
                 <div className="current-folder-label">
                     Showing: {dir ? `/${dir}` : "/"}
                 </div>
-                <Gallery dir={dir} />
+                <Gallery key={refreshKey} dir={dir} />
             </main>
+
+            {settingsOpen && (
+                <SettingsModal
+                    onClose={() => setSettingsOpen(false)}
+                    onSave={handleSettingsSave}
+                />
+            )}
         </div>
     );
 }

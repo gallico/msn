@@ -1,0 +1,21 @@
+const Database = require("better-sqlite3");
+const path = require("path");
+
+const db = new Database(path.join(__dirname, "gallery.db"));
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS attr_defs (
+        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        name    TEXT UNIQUE NOT NULL,
+        has_value INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS file_attrs (
+        file_path TEXT    NOT NULL,
+        attr_name TEXT    NOT NULL,
+        value     INTEGER,
+        PRIMARY KEY (file_path, attr_name)
+    );
+`);
+
+module.exports = db;

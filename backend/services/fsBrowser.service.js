@@ -1,11 +1,11 @@
 // backend/services/fsBrowser.service.js
 const fs = require("fs");
 const path = require("path");
-
-const mediaRoot = path.join(__dirname, "../assets");
+const { getSettings } = require("../settings");
 
 // Return folders and files for a given relative path
 function listDir(relPath = ".") {
+    const mediaRoot = getSettings().baseFolder;
     const fullPath = path.join(mediaRoot, relPath);
 
     if (!fs.existsSync(fullPath)) {

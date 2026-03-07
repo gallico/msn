@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { fetchGalleryItems } from "../services/galleryApi";
 import MediaItem from "./MediaItem";
+import AttributePanel from "./AttributePanel";
+import BulkAttrModal from "./BulkAttrModal";
 
 function Gallery({ dir = "" }) {
     const [items, setItems] = useState([]);
@@ -9,6 +11,9 @@ function Gallery({ dir = "" }) {
     const [currentIndex, setCurrentIndex] = useState(0); // NEW: track position
     const [isFullscreen, setIsFullscreen] = useState(false);
     const modalRef = useRef(null);
+    const [selectMode, setSelectMode] = useState(false);
+    const [selectedPaths, setSelectedPaths] = useState(new Set());
+    const [bulkModalOpen, setBulkModalOpen] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -23,11 +28,31 @@ function Gallery({ dir = "" }) {
             });
     }, [dir]);
 
+    const itemFilePath = (item) =>
+        item.dir ? `${item.dir}/${item.id}` : item.id;
+
     const openItem = (item) => {
+        if (selectMode) {
+            const fp = itemFilePath(item);
+            setSelectedPaths((prev) => {
+                const next = new Set(prev);
+                next.has(fp) ? next.delete(fp) : next.add(fp);
+                return next;
+            });
+            return;
+        }
         const index = items.findIndex(i => i.id === item.id);
         setCurrentIndex(index);
         setSelectedItem(item);
     };
+
+    const toggleSelectMode = () => {
+        setSelectMode((v) => !v);
+        setSelectedPaths(new Set());
+    };
+
+    const selectAll = () => setSelectedPaths(new Set(items.map(itemFilePath)));
+    const clearSelection = () => setSelectedPaths(new Set());
 
     const closeItem = () => {
         setSelectedItem(null);
@@ -111,12 +136,39 @@ function Gallery({ dir = "" }) {
         <div className="gallery">
             {loading && <div>Loading...</div>}
 
+            <div className="gallery-toolbar">
+                <button
+                    className={`select-mode-btn${selectMode ? " active" : ""}`}
+                    onClick={toggleSelectMode}
+                >
+                    {selectMode ? "Cancel" : "Select"}
+                </button>
+                {selectMode && (
+                    <>
+                        <span className="selection-count">
+                            {selectedPaths.size} selected
+                        </span>
+                        <button onClick={selectAll}>All</button>
+                        <button onClick={clearSelection}>None</button>
+                        <button
+                            className="btn-primary"
+                            disabled={selectedPaths.size === 0}
+                            onClick={() => setBulkModalOpen(true)}
+                        >
+                            Assign attributes…
+                        </button>
+                    </>
+                )}
+            </div>
+
             <div className="gallery-grid">
                 {items.map(item => (
                     <MediaItem
                         key={item.id}
                         item={item}
                         onClick={openItem}
+                        selectMode={selectMode}
+                        selected={selectedPaths.has(itemFilePath(item))}
                     />
                 ))}
             </div>
@@ -175,13 +227,33 @@ function Gallery({ dir = "" }) {
 
                         <div className="modal-title">
                             {selectedItem.title}
-                            {/* NEW: position indicator */}
                             <span className="position-indicator">
                 ({currentIndex + 1} / {items.length})
               </span>
                         </div>
+
+                        {!isFullscreen && (
+                            <AttributePanel
+                                filePath={
+                                    selectedItem.dir
+                                        ? `${selectedItem.dir}/${selectedItem.id}`
+                                        : selectedItem.id
+                                }
+                            />
+                        )}
                     </div>
                 </div>
+            )}
+            {bulkModalOpen && (
+                <BulkAttrModal
+                    paths={[...selectedPaths]}
+                    onClose={() => setBulkModalOpen(false)}
+                    onDone={() => {
+                        setBulkModalOpen(false);
+                        setSelectMode(false);
+                        setSelectedPaths(new Set());
+                    }}
+                />
             )}
         </div>
     );

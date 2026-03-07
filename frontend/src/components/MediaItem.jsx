@@ -1,8 +1,8 @@
 // frontend/src/components/MediaItem.js
 import React, { useState } from "react";
 
-function MediaItem({ item, onClick }) {
-    const [thumbError, setThumbError] = useState(false); // NEW: track thumb load error
+function MediaItem({ item, onClick, selectMode = false, selected = false }) {
+    const [thumbError, setThumbError] = useState(false);
 
     const handleItemClick = () => {
         if (onClick) onClick(item);
@@ -16,9 +16,14 @@ function MediaItem({ item, onClick }) {
     };
 
     return (
-        <div className="media-item" onClick={handleItemClick}>
+        <div
+            className={`media-item${selectMode ? " select-mode" : ""}${selected ? " selected" : ""}`}
+            onClick={handleItemClick}
+        >
+            {selectMode && (
+                <div className="select-checkbox">{selected ? "☑" : "☐"}</div>
+            )}
             {thumbError ? (
-                // NEW: Fallback icon for failed thumbs
                 <div className="thumb-fallback">
                     {isVideo ? "📹" : "🖼️"}
                 </div>
