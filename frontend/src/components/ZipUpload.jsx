@@ -35,7 +35,7 @@ function ZipUpload({ currentDir, onDone }) {
             <input
                 ref={inputRef}
                 type="file"
-                accept=".zip"
+                accept=".zip,.rar"
                 style={{ display: "none" }}
                 onChange={handleChange}
             />
@@ -44,7 +44,7 @@ function ZipUpload({ currentDir, onDone }) {
                 onClick={() => inputRef.current.click()}
                 disabled={status === "uploading"}
             >
-                {status === "uploading" ? "Uploading…" : "Upload ZIP"}
+                {status === "uploading" ? "Uploading…" : "Upload ZIP/RAR"}
             </button>
             {status === "ok" && (
                 <span className="zip-status zip-ok">{message}</span>

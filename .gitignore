@@ -2,3 +2,5 @@ node_modules/
 backend/assets/
 .idea/
 dist/
+backend/gallery.db
+backend/settings.json

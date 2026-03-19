@@ -1017,3 +1017,73 @@
   font-style: italic;
   font-size: 0.9rem;
 }
+
+/* ── Login ─────────────────────────────────────────────── */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.login-box {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 320px;
+}
+
+.login-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+.login-input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #e0e0e0;
+  font-size: 1rem;
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: #666;
+}
+
+.login-btn {
+  margin-top: 0.4rem;
+  padding: 0.65rem;
+  border-radius: 6px;
+  border: none;
+  background: #4a90d9;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #5aa0e8;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.login-error {
+  margin: 0;
+  color: #e06c6c;
+  font-size: 0.88rem;
+  text-align: center;
+}

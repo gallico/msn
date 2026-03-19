@@ -11,6 +11,7 @@ function Gallery({ dir = "" }) {
     const [currentIndex, setCurrentIndex] = useState(0); // NEW: track position
     const [isFullscreen, setIsFullscreen] = useState(false);
     const modalRef = useRef(null);
+    const videoRef = useRef(null);
     const [selectMode, setSelectMode] = useState(false);
     const [selectedPaths, setSelectedPaths] = useState(new Set());
     const [bulkModalOpen, setBulkModalOpen] = useState(false);
@@ -97,11 +98,22 @@ function Gallery({ dir = "" }) {
                     break;
                 case "ArrowLeft":
                     e.preventDefault();
-                    goPrev();
+                    if (e.shiftKey && videoRef.current) {
+                        videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+                    } else {
+                        goPrev();
+                    }
                     break;
                 case "ArrowRight":
                     e.preventDefault();
-                    goNext();
+                    if (e.shiftKey && videoRef.current) {
+                        videoRef.current.currentTime = Math.min(
+                            videoRef.current.duration || Infinity,
+                            videoRef.current.currentTime + 10
+                        );
+                    } else {
+                        goNext();
+                    }
                     break;
             }
         };
@@ -183,12 +195,14 @@ function Gallery({ dir = "" }) {
                     >
                         {selectedItem.type === "image" ? (
                             <img
+                                ref={() => { videoRef.current = null; }}
                                 src={selectedItem.src}
                                 alt={selectedItem.title}
                                 className="modal-media"
                             />
                         ) : (
                             <video
+                                ref={videoRef}
                                 src={selectedItem.src}
                                 controls
                                 autoPlay

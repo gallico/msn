@@ -16,8 +16,6 @@ async function ensureThumbnail(videoPath, thumbDir, thumbFilename) {
 
     if (fs.existsSync(thumbPath)) return thumbFilename;
 
-    console.log(`Generating: ${videoPath} → ${thumbPath}`);
-
     return new Promise((resolve, reject) => {
         ffmpeg(videoPath)
             .seekInput("00:00:01")
@@ -89,17 +87,14 @@ async function getMediaFromDir(dir = ".") {
             }
         }
 
-        let nl = // Build item with CORRECT thumb filename
-            mediaItems.push({
-                id: file,
-                src: `/media/${dir ? dir + "/" : ""}${file}`,
-                thumb: thumbPath ? `/media/${dir ? dir + "/" : ""}${thumbPath}` : null, // ✅ thumb_video.png
-                type: isImage ? "image" : "video",
-                title: file,
-                dir
-            });
-        let lelem = mediaItems[nl-1];
-        console.log(`element: ${lelem.src} ${lelem.thumb ?? '<null>'}`);
+        mediaItems.push({
+            id: file,
+            src: `/media/${dir ? dir + "/" : ""}${file}`,
+            thumb: thumbPath ? `/media/${dir ? dir + "/" : ""}${thumbPath}` : null, // ✅ thumb_video.png
+            type: isImage ? "image" : "video",
+            title: file,
+            dir
+        });
     }
 
     return mediaItems.sort((a, b) => b.mtime - a.mtime);

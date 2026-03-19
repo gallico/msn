@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const SETTINGS_FILE = path.join(__dirname, "settings.json");
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const DEFAULT_BASE_FOLDER = path.join(__dirname, "assets");
 
 function getSettings() {

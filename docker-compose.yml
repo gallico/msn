@@ -1,0 +1,20 @@
+services:
+  msn:
+    build: .
+    image: msn:latest
+    container_name: msn
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      # Persistent app data (settings.json + gallery.db)
+      - msn-data:/app/data
+      # Your NAS media share — adjust the host path to match your volume/folder.
+      # After starting, open Settings in the app and set the base folder to /mnt/media
+      - /volume1/media:/mnt/media:ro
+    environment:
+      - DATA_DIR=/app/data
+      - NODE_ENV=production
+
+volumes:
+  msn-data:

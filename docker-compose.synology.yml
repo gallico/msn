@@ -1,0 +1,23 @@
+services:
+  msn:
+    image: msn:latest
+    container_name: msn
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      # Persistent app data (settings.json + gallery.db)
+      - msn-data:/app/data
+      # Adjust host path to your NAS media share.
+      # After starting, open Settings in the app and set base folder to /mnt/media.
+      # Remove :ro if you need ZIP/RAR upload to write to this share.
+      - /volume1/media:/mnt/media:ro
+    environment:
+      - DATA_DIR=/app/data
+      - NODE_ENV=production
+      - AUTH_USER=ulrb          # change me
+      - AUTH_PASS=17482356       # change me
+      - SESSION_SECRET=fhCQok3X5xmhUP35SF9Ou8dCgxMThF60rBgqimm8cp89plC5lQRLXaJizWzMrzBg5JgNMGKOpRobG2Fz4tRHMv1bIPsTsdYjazQIf0XDykV907RUfou9RiAHhiBu0iuiWb9Fu3ZvpnHcSQgMppJF19pzKnRrIsA9MPVN5hOmri9gF9M3ATPE4TGsWh4rMxzfIwTr5vja
+
+volumes:
+  msn-data:

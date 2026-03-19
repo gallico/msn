@@ -4,6 +4,8 @@ import Gallery from "./components/Gallery";
 import DirectoryBrowser from "./components/DirectoryBrowser";
 import SettingsModal from "./components/SettingsModal";
 import ZipUpload from "./components/ZipUpload";
+import LoginForm from "./components/LoginForm";
+import { checkAuth, logout } from "./services/authApi";
 import "./index.css";
 import "./App.css";
 
@@ -13,6 +15,20 @@ function App() {
     const [isResizing, setIsResizing] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    // Auth state: null = unknown, false = need login, true = authenticated
+    const [authReady, setAuthReady] = useState(null);
+
+    useEffect(() => {
+        checkAuth().then(({ enabled, authenticated }) => {
+            setAuthReady(!enabled || authenticated);
+        }).catch(() => setAuthReady(true)); // if endpoint fails, don't block the app
+    }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        setAuthReady(false);
+    };
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -51,6 +67,9 @@ function App() {
         setRefreshKey((k) => k + 1);
     };
 
+    if (authReady === null) return null; // waiting for auth check
+    if (authReady === false) return <LoginForm onLogin={() => setAuthReady(true)} />;
+
     return (
         <div className="App layout">
             <aside
@@ -65,6 +84,13 @@ function App() {
                         title="Settings"
                     >
                         ⚙
+                    </button>
+                    <button
+                        className="settings-btn"
+                        onClick={handleLogout}
+                        title="Sign out"
+                    >
+                        ⏻
                     </button>
                 </div>
                 <DirectoryBrowser key={refreshKey} selectedDir={dir} onSelectDir={setDir} />

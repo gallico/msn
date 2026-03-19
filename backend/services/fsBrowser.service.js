@@ -9,7 +9,7 @@ function listDir(relPath = ".") {
     const fullPath = path.join(mediaRoot, relPath);
 
     if (!fs.existsSync(fullPath)) {
-        throw new Error("Path does not exist");
+        return { directories: [], files: [], relPath, error: "Path does not exist" };
     }
 
     const dirents = fs.readdirSync(fullPath, { withFileTypes: true });
