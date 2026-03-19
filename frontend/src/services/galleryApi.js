@@ -4,3 +4,9 @@ export async function fetchGalleryItems(dir) {
     if (!res.ok) throw new Error("Failed to fetch gallery items");
     return res.json();
 }
+
+export async function fetchAttrDefs() {
+    const res = await fetch("/api/attrs/defs");
+    if (!res.ok) throw new Error("Failed to fetch attr defs");
+    return res.json();
+}

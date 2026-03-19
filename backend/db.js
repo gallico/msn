@@ -17,6 +17,12 @@ db.exec(`
         value     INTEGER,
         PRIMARY KEY (file_path, attr_name)
     );
+
+    CREATE TABLE IF NOT EXISTS saved_views (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        name      TEXT UNIQUE NOT NULL,
+        rule_json TEXT NOT NULL
+    );
 `);
 
 module.exports = db;

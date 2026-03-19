@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { fetchGalleryItems } from "../services/galleryApi";
+import { fetchViewItems } from "../services/viewsApi";
 import MediaItem from "./MediaItem";
 import AttributePanel from "./AttributePanel";
 import BulkAttrModal from "./BulkAttrModal";
 
-function Gallery({ dir = "" }) {
+function Gallery({ dir = "", viewId = null }) {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -15,10 +16,16 @@ function Gallery({ dir = "" }) {
     const [selectMode, setSelectMode] = useState(false);
     const [selectedPaths, setSelectedPaths] = useState(new Set());
     const [bulkModalOpen, setBulkModalOpen] = useState(false);
+    const [slideshowActive, setSlideshowActive] = useState(false);
+    const [slideshowDelay, setSlideshowDelay] = useState(3);
+    const [showDelayInput, setShowDelayInput] = useState(false);
 
     useEffect(() => {
         setLoading(true);
-        fetchGalleryItems(dir)
+        const fetchFn = viewId
+            ? fetchViewItems(viewId)
+            : fetchGalleryItems(dir);
+        fetchFn
             .then(data => {
                 setItems(data.items);
                 setLoading(false);
@@ -27,7 +34,7 @@ function Gallery({ dir = "" }) {
                 console.error(err);
                 setLoading(false);
             });
-    }, [dir]);
+    }, [dir, viewId]);
 
     const itemFilePath = (item) =>
         item.dir ? `${item.dir}/${item.id}` : item.id;
@@ -57,6 +64,8 @@ function Gallery({ dir = "" }) {
 
     const closeItem = () => {
         setSelectedItem(null);
+        setSlideshowActive(false);
+        setShowDelayInput(false);
         exitFullscreen();
     };
 
@@ -95,6 +104,12 @@ function Gallery({ dir = "" }) {
             switch (e.key) {
                 case "Escape":
                     closeItem();
+                    break;
+                case " ":
+                    if (selectedItem?.type === "image") {
+                        e.preventDefault();
+                        toggleSlideshow();
+                    }
                     break;
                 case "ArrowLeft":
                     e.preventDefault();
@@ -143,6 +158,15 @@ function Gallery({ dir = "" }) {
             document.exitFullscreen();
         }
     };
+
+    // Slideshow auto-advance
+    useEffect(() => {
+        if (!slideshowActive || !selectedItem) return;
+        const id = setTimeout(() => goToIndex(currentIndex + 1), slideshowDelay * 1000);
+        return () => clearTimeout(id);
+    }, [slideshowActive, slideshowDelay, currentIndex, selectedItem]);
+
+    const toggleSlideshow = () => setSlideshowActive((v) => !v);
 
     return (
         <div className="gallery">
@@ -214,7 +238,7 @@ function Gallery({ dir = "" }) {
                         )}
 
                         <div className="modal-controls">
-                            {/* NEW: Nav buttons */}
+                            {/* Nav buttons */}
                             <button
                                 onClick={goPrev}
                                 className="nav-btn prev-btn"
@@ -229,6 +253,35 @@ function Gallery({ dir = "" }) {
                             >
                                 ⛶ {isFullscreen ? "⛶" : "⬜"}
                             </button>
+                            {/* Slideshow controls */}
+                            <div className="slideshow-controls">
+                                <button
+                                    className={`slideshow-btn${slideshowActive ? " active" : ""}`}
+                                    onClick={toggleSlideshow}
+                                    title={slideshowActive ? "Pause slideshow (Space)" : "Start slideshow (Space)"}
+                                >
+                                    {slideshowActive ? "⏸" : "▶"}
+                                </button>
+                                <button
+                                    className="slideshow-delay-btn"
+                                    onClick={() => setShowDelayInput((v) => !v)}
+                                    title="Set delay"
+                                >
+                                    {slideshowDelay}s
+                                </button>
+                                {showDelayInput && (
+                                    <input
+                                        className="slideshow-delay-input"
+                                        type="number"
+                                        min={1}
+                                        max={60}
+                                        value={slideshowDelay}
+                                        onChange={(e) => setSlideshowDelay(Math.max(1, Number(e.target.value)))}
+                                        onKeyDown={(e) => e.key === "Enter" && setShowDelayInput(false)}
+                                        autoFocus
+                                    />
+                                )}
+                            </div>
                             <button
                                 onClick={goNext}
                                 className="nav-btn next-btn"

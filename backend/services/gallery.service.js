@@ -100,4 +100,4 @@ async function getMediaFromDir(dir = ".") {
     return mediaItems.sort((a, b) => b.mtime - a.mtime);
 }
 
-module.exports = { getMediaFromDir };
+module.exports = { getMediaFromDir, ensureThumbnail };
