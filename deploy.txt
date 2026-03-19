@@ -1,0 +1,22 @@
+Here's the deployment process:
+
+  1. Build the image on your dev machine:
+  cd ~/workspace/msn
+  docker build -t msn:latest .
+
+  2. Export and transfer to the Synology:
+  docker save msn:latest | gzip > msn.tar.gz
+  scp msn.tar.gz ulrb@<synology-ip>:~/
+
+  3. SSH into the Synology and load the image:
+  ssh ulrb@<synology-ip>
+  docker load < msn.tar.gz
+
+  4. Restart the container:
+  cd ~/   # or wherever docker-compose.synology.yml lives on the NAS
+  docker compose -f docker-compose.synology.yml up -d
+
+  If it's the first deploy, also copy the compose file over:
+  scp docker-compose.synology.yml ulrb@<synology-ip>:~/
+
+  Note: Your existing msn-data volume (which holds gallery.db and settings.json) is preserved across restarts — the new saved_views table will be created automatically on first boot since db.js runs CREATE TABLE IF NOT EXISTS.
