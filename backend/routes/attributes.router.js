@@ -2,12 +2,18 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
+const PREDEFINED_ATTRS = [
+    { id: null, name: "image", hasValue: 0, predefined: true },
+    { id: null, name: "video", hasValue: 0, predefined: true },
+];
+const PREDEFINED_NAMES = new Set(PREDEFINED_ATTRS.map(a => a.name));
+
 // GET all attribute definitions
 router.get("/defs", (req, res) => {
     const defs = db
         .prepare("SELECT id, name, has_value as hasValue FROM attr_defs ORDER BY name")
         .all();
-    res.json(defs);
+    res.json([...PREDEFINED_ATTRS, ...defs]);
 });
 
 // POST new attribute definition
@@ -29,6 +35,8 @@ router.post("/defs", (req, res) => {
 // DELETE attribute definition + all its file assignments
 router.delete("/defs/:name", (req, res) => {
     const { name } = req.params;
+    if (PREDEFINED_NAMES.has(name))
+        return res.status(403).json({ error: "Cannot delete predefined attributes" });
     db.prepare("DELETE FROM file_attrs WHERE attr_name = ?").run(name);
     db.prepare("DELETE FROM attr_defs WHERE name = ?").run(name);
     res.status(204).end();

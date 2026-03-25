@@ -23,6 +23,15 @@ db.exec(`
         name      TEXT UNIQUE NOT NULL,
         rule_json TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS video_clips (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_path TEXT    NOT NULL,
+        name      TEXT    NOT NULL,
+        start_ms  INTEGER,
+        end_ms    INTEGER,
+        UNIQUE(file_path, name)
+    );
 `);
 
 module.exports = db;

@@ -8,7 +8,7 @@ function emptyGroup() {
 }
 
 function emptyCondition(attrDefs) {
-    const first = attrDefs[0];
+    const first = attrDefs.find(d => !d.predefined) ?? attrDefs[0];
     return {
         type: "condition",
         attr: first?.name ?? "",
@@ -38,9 +38,24 @@ function RuleCondition({ rule, onChange, onRemove, attrDefs }) {
     return (
         <div className="rule-condition">
             <select value={rule.attr} onChange={e => setAttr(e.target.value)}>
-                {attrDefs.map(d => (
-                    <option key={d.name} value={d.name}>{d.name}</option>
-                ))}
+                {attrDefs.some(d => d.predefined) && attrDefs.some(d => !d.predefined) ? (
+                    <>
+                        <optgroup label="Predefined">
+                            {attrDefs.filter(d => d.predefined).map(d => (
+                                <option key={d.name} value={d.name}>{d.name}</option>
+                            ))}
+                        </optgroup>
+                        <optgroup label="Custom">
+                            {attrDefs.filter(d => !d.predefined).map(d => (
+                                <option key={d.name} value={d.name}>{d.name}</option>
+                            ))}
+                        </optgroup>
+                    </>
+                ) : (
+                    attrDefs.map(d => (
+                        <option key={d.name} value={d.name}>{d.name}</option>
+                    ))
+                )}
             </select>
 
             <select value={rule.op} onChange={e => setOp(e.target.value)}>

@@ -9,7 +9,7 @@ function MediaItem({ item, onClick, selectMode = false, selected = false }) {
     };
 
     const thumbUrl = item.thumb || item.src;
-    const isVideo = item.type === "video";
+    const isVideo = item.type === "video" || item.type === "clip";
 
     const handleThumbError = () => {
         setThumbError(true); // NEW: mark as failed
@@ -25,7 +25,7 @@ function MediaItem({ item, onClick, selectMode = false, selected = false }) {
             )}
             {thumbError ? (
                 <div className="thumb-fallback">
-                    {isVideo ? "📹" : "🖼️"}
+                    {item.type === "clip" ? "✂" : isVideo ? "📹" : "🖼️"}
                 </div>
             ) : (
                 // Existing thumb logic with error handler
@@ -47,6 +47,7 @@ function MediaItem({ item, onClick, selectMode = false, selected = false }) {
                 )
             )}
             <div className="media-title">
+                {item.type === "clip" && <span className="clip-badge">✂</span>}
                 {item.title}
             </div>
         </div>

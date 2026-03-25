@@ -10,10 +10,11 @@ function AttrSelector({ defs, onDefCreated, selected, onToggle, onSetValue, onDe
     const [newHasValue, setNewHasValue] = useState(false);
     const [error, setError] = useState("");
 
-    const useSearch = defs.length > SEARCH_THRESHOLD;
+    const userDefs = defs.filter(d => !d.predefined);
+    const useSearch = userDefs.length > SEARCH_THRESHOLD;
     const visible = useSearch && filter.trim()
-        ? defs.filter((d) => d.name.toLowerCase().includes(filter.toLowerCase()))
-        : defs;
+        ? userDefs.filter((d) => d.name.toLowerCase().includes(filter.toLowerCase()))
+        : userDefs;
 
     const addDef = async () => {
         if (!newName.trim()) return;
