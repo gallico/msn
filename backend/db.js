@@ -32,6 +32,14 @@ db.exec(`
         end_ms    INTEGER,
         UNIQUE(file_path, name)
     );
+
+    CREATE TABLE IF NOT EXISTS media_fingerprints (
+        file_path TEXT    PRIMARY KEY,
+        file_size INTEGER,
+        mtime     INTEGER,
+        sha256    TEXT,
+        phash     TEXT
+    );
 `);
 
 module.exports = db;

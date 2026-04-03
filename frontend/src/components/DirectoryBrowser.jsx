@@ -1,11 +1,13 @@
 // frontend/src/components/DirectoryBrowser.js
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { browseDir } from "../services/fsApi";
+import DuplicatesModal from "./DuplicatesModal";
 
 function DirectoryBrowser({ selectedDir, onSelectDir }) {
     const [currentPath, setCurrentPath] = useState(".");
     const [directories, setDirectories] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [dupesOpen, setDupesOpen] = useState(false);
 
     const scrollContainerRef = useRef(null);
     const scrollStack = useRef([]);
@@ -55,9 +57,14 @@ function DirectoryBrowser({ selectedDir, onSelectDir }) {
                 <div className="dir-path">
                     Current: {currentPath === "." ? "/" : `/${currentPath}`}
                 </div>
-                <button onClick={goUp} disabled={currentPath === "."}>
-                    ↑ Up
-                </button>
+                <div className="dir-header-btns">
+                    <button onClick={goUp} disabled={currentPath === "."}>↑ Up</button>
+                    <button
+                        className="dupes-btn"
+                        title="Find duplicates in this folder"
+                        onClick={() => setDupesOpen(true)}
+                    >⊕ Dupes</button>
+                </div>
             </div>
 
             {loading && <div>Loading folders...</div>}
@@ -90,6 +97,13 @@ function DirectoryBrowser({ selectedDir, onSelectDir }) {
                     );
                 })}
             </ul>
+
+            {dupesOpen && (
+                <DuplicatesModal
+                    dir={currentPath === "." ? "" : currentPath}
+                    onClose={() => setDupesOpen(false)}
+                />
+            )}
         </div>
     );
 }

@@ -11,7 +11,8 @@ const uploadRouter    = require("./routes/upload.router");
 const attrsRouter     = require("./routes/attributes.router");
 const authRouter      = require("./routes/auth.router");
 const viewsRouter     = require("./routes/views.router");
-const clipsRouter     = require("./routes/clips.router");
+const clipsRouter        = require("./routes/clips.router");
+const fingerprintRouter  = require("./routes/fingerprint.router");
 
 // Session
 const session = require("express-session");
@@ -66,7 +67,8 @@ app.use("/api/settings", requireAuth, settingsRouter);
 app.use("/api/upload",   requireAuth, uploadRouter);
 app.use("/api/attrs",    requireAuth, attrsRouter);
 app.use("/api/views",   requireAuth, viewsRouter);
-app.use("/api/clips",   requireAuth, clipsRouter);
+app.use("/api/clips",        requireAuth, clipsRouter);
+app.use("/api/fingerprint",  requireAuth, fingerprintRouter);
 
 // Serve built frontend (production — skipped in dev where Vite runs separately)
 const distPath = path.join(__dirname, "../frontend/dist");
