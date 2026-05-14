@@ -9,7 +9,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "adm-zip": "^0.5.16",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^12.10.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",

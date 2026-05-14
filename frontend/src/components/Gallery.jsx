@@ -19,6 +19,7 @@ function Gallery({ dir = "", viewId = null }) {
     const [bulkModalOpen, setBulkModalOpen] = useState(false);
     const [slideshowActive, setSlideshowActive] = useState(false);
     const [slideshowDelay, setSlideshowDelay] = useState(3);
+    const [slideshowDirection, setSlideshowDirection] = useState("forward"); // "forward" | "backward" | "random"
     const [showDelayInput, setShowDelayInput] = useState(false);
     const [activeClip, setActiveClip] = useState(null); // { id, startMs, endMs }
 
@@ -164,14 +165,40 @@ function Gallery({ dir = "", viewId = null }) {
         }
     };
 
-    // Slideshow auto-advance
+    const toggleSlideshow = () => setSlideshowActive((v) => !v);
+
+    const cycleDirection = () => setSlideshowDirection((d) =>
+        d === "forward" ? "backward" : d === "backward" ? "random" : "forward"
+    );
+
+    const nextSlideshowIndex = useCallback(() => {
+        if (slideshowDirection === "backward") return (currentIndex - 1 + items.length) % items.length;
+        if (slideshowDirection === "random") {
+            if (items.length <= 1) return currentIndex;
+            let idx;
+            do { idx = Math.floor(Math.random() * items.length); } while (idx === currentIndex);
+            return idx;
+        }
+        return (currentIndex + 1) % items.length;
+    }, [slideshowDirection, currentIndex, items]);
+
+    // Slideshow auto-advance (images only)
     useEffect(() => {
         if (!slideshowActive || !selectedItem) return;
-        const id = setTimeout(() => goToIndex(currentIndex + 1), slideshowDelay * 1000);
+        if (selectedItem.type === "video" || selectedItem.type === "clip") return;
+        const id = setTimeout(() => goToIndex(nextSlideshowIndex()), slideshowDelay * 1000);
         return () => clearTimeout(id);
-    }, [slideshowActive, slideshowDelay, currentIndex, selectedItem]);
+    }, [slideshowActive, slideshowDelay, currentIndex, selectedItem, nextSlideshowIndex]);
 
-    const toggleSlideshow = () => setSlideshowActive((v) => !v);
+    // Slideshow advance for videos: imperatively manage loop + ended listener
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !slideshowActive || !selectedItem || selectedItem.type !== "video" || activeClip) return;
+        video.loop = false;
+        const handleEnded = () => goToIndex(nextSlideshowIndex());
+        video.addEventListener("ended", handleEnded);
+        return () => video.removeEventListener("ended", handleEnded);
+    }, [slideshowActive, selectedItem, activeClip, currentIndex, goToIndex, nextSlideshowIndex]);
 
     // Set activeClip when opening a clip item from a view
     useEffect(() => {
@@ -194,9 +221,13 @@ function Gallery({ dir = "", viewId = null }) {
     const handleVideoTimeUpdate = useCallback(() => {
         if (!activeClip || activeClip.endMs == null) return;
         if (videoRef.current && videoRef.current.currentTime * 1000 >= activeClip.endMs) {
-            videoRef.current.pause();
+            if (slideshowActive) {
+                goToIndex(nextSlideshowIndex());
+            } else {
+                videoRef.current.pause();
+            }
         }
-    }, [activeClip]);
+    }, [activeClip, slideshowActive, nextSlideshowIndex]);
 
     return (
         <div className="gallery">
@@ -272,7 +303,7 @@ function Gallery({ dir = "", viewId = null }) {
                                         controls
                                         autoPlay
                                         muted
-                                        loop={!activeClip}
+                                        loop={!activeClip && !slideshowActive}
                                         playsInline
                                         className="modal-media"
                                         onTimeUpdate={handleVideoTimeUpdate}
@@ -321,6 +352,13 @@ function Gallery({ dir = "", viewId = null }) {
                                             title="Set delay"
                                         >
                                             {slideshowDelay}s
+                                        </button>
+                                        <button
+                                            className="slideshow-direction-btn"
+                                            onClick={cycleDirection}
+                                            title={`Slideshow direction: ${slideshowDirection} (click to change)`}
+                                        >
+                                            {slideshowDirection === "forward" ? "→" : slideshowDirection === "backward" ? "←" : "~"}
                                         </button>
                                         {showDelayInput && (
                                             <input

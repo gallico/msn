@@ -397,7 +397,8 @@
 }
 
 .slideshow-btn,
-.slideshow-delay-btn {
+.slideshow-delay-btn,
+.slideshow-direction-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
@@ -409,7 +410,8 @@
 }
 
 .slideshow-btn:hover,
-.slideshow-delay-btn:hover {
+.slideshow-delay-btn:hover,
+.slideshow-direction-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
